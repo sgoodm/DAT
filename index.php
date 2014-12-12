@@ -32,7 +32,8 @@
          <option id="blank_country_option" value="-----">-----</option>
          <option value="Nepal">Nepal</option>
          <option value="Uganda">Uganda</option>
-         <option value="Malawi">Malawi</option>  
+         <option value="Malawi">Malawi</option> 
+         <option value="Senegal">Senegal</option>  
       </select>
       <button>Load Options</button>
    </div>

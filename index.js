@@ -1,4 +1,11 @@
 $(document).ready(function(){
+	
+	var s, p = {
+		country:"",
+		type:"",
+		aggregation:"None",
+		filters:{}
+	}
 
 	$('#country').val("-----")
 
@@ -9,27 +16,64 @@ $(document).ready(function(){
 			$blank.remove() 
 		}
 
-		var country = $(this).val()
-		
-		var csv = "data/" + country + ".csv"
-		console.log(csv)
+		p.country = $(this).val()
 
-	    var request = $.ajax({
-	    	type: "GET",
-			dataType: "text",
-			url: csv,
-			async: false,
-	    })
-	    
-	    var content = request.responseText
 
-		console.log(content)
-
-		var data = $.csv.toArrays(content)
-		console.log(data)
-		
+		switch (p.country) {
+			case 'Malawi':
+			case 'Nepal':
+			case 'Uganda':
+				p.type = "old"
+				break
+			case 'Senegal':
+				p.type = "new"
+				break
+		}
 
 	})
 
+
+	$('#load button').click(function(){
+
+		var agg_list = ["donors", "ad_sector_names", "status", ]
+		// if (p.type == "new") {
+		// 	agg_list = ["donors", "ad_sector_names", "status", ]
+		// } else {
+		// 	agg_list = ["donors", "ad_sector_names", "status"]
+		// }
+
+		process({call:"fields", country:p.country, type:p.type}, function (result){
+			console.log(result)
+		})
+
+		process({call:"options", country:p.country, type:p.type}, function (result){
+			console.log(result)
+		})
+
+	})
+
+	$('#submit').click(function(){
+		
+		s = p
+
+		process({call:"build", country:s.country}, function (result){
+			console.log(result)
+		})
+
+	})
+
+	// generic ajax call to process.php
+	function process(data, callback) {
+		$.ajax ({
+	        url: "process.php",
+	        data: data,
+	        dataType: "json",
+	        type: "post",
+	        async: false,
+	        success: function (result) {
+			    callback(result)
+			}
+	    })
+	}
 
 })
