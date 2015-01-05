@@ -29,7 +29,7 @@
    <div id="load" class="row">
       <span> Select a Country: </span>
       <select id="country" >
-         <option id="blank_country_option" value="-----">-----</option>
+         <option id="blank_country_option" value="-----" class="blank">-----</option>
          <option value="Nepal">Nepal</option>
          <option value="Uganda">Uganda</option>
          <option value="Malawi">Malawi</option> 
@@ -43,21 +43,21 @@
       <div id="optcol1" class="col-md-4">
             <span> Aggregation Field </span>
             <select id="aggregate" size="5">
-               <option value="-----">please select a country</option>
+               <option value="-----" class="blank">please select a country</option>
             </select>
       </div>
 
       <div id="optcol2" class="col-md-4">
          <span> Filter Field </span>
          <div id="filter" >
-            <label><input type="checkbox" value="-----">please select a country</label>
+            <label class="blank"><input type="checkbox" value="-----">please select a country</label>
          </div>
       </div>
 
       <div id="optcol3" class="col-md-4">
-         <span> Filter Value </span>
+         <span> Filter Options </span>
          <div id="values" >
-            <span value="-----">please select a country</span>
+            <span value="-----" class="blank group">please select a country</span>
          </div>
       </div>
 
@@ -67,11 +67,13 @@
       <button id="submit">Generate CSV</button>
    </div>
 
+   <div id="download"></div>
+
    <div id="info">
       <div>
          <h3>Tips</h3>
          <ul>
-            <li>If you want the raw data but just a specific subset of the Release, leave the <b>Aggregation Field</b> as <i>None</i> and use the <b>Filter Field</b> and <b>Filter Value</b> to select the data you want.</li>
+            <li>If you want the raw data but just a specific subset of the Release, leave the <b>Aggregation Field</b> as <i>None</i> and use the <b>Filter Field</b> and <b>Filter Options</b> to select the data you want.</li>
             <!-- <li>Tip</li> -->
          </ul>
       </div>
@@ -83,6 +85,8 @@
          </ul>
       </div>
    </div>
+
+
 
 
 <!--==================================================================================================== -->

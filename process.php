@@ -1,4 +1,5 @@
 <?php
+set_time_limit(0);
 
 switch ($_POST['call']) {
 
@@ -27,10 +28,17 @@ switch ($_POST['call']) {
 		$db = $m->selectDB($database);
 
 		$col = $db->$collection;
-		$data = iterator_to_array($col->find());
+		$cursor = $col->find();
 
-		$out = array_keys( $data[array_keys($data)[0]] );
-		array_shift($out);
+	    $first = true;
+	    foreach ($cursor as $item) {
+	        if ( $first == true ){
+	    	    $data = (array) $item;
+	            $out = array_keys( $data );
+	            array_shift($out);
+	            $first = false;
+	        }
+	    }
 
 		echo json_encode($out);
 		break;
@@ -39,6 +47,7 @@ switch ($_POST['call']) {
 	case "options":
 		$database = $_POST['country'];
 		$type = $_POST['type'];
+		$field = $_POST['field'];
 
 		$collection = "projects";
 		if ($type == "old") {
@@ -50,20 +59,21 @@ switch ($_POST['call']) {
 		$db = $m->selectDB($database);
 
 		$col = $db->$collection;
-		$data = $col->distinct('ad_sector_names');
+		$data = $col->distinct($field);
 
+
+		// initial split
 		for ($i=0; $i<count($data);$i++) {
 			if (strpos($data[$i], "|") !== false) {
-				$temp = $data[$i];
-				unset($data[$i]);
-				$new = explode("|", $temp);
+				$new = explode("|", $data[$i]);
+				$data[$i] = array_shift($new);
 				foreach ($new as $item) {
 					$data[] = $item;
 				}
 			}
 		}
 
-		$out = $data;
+		$out = array_unique($data);
 
 		echo json_encode($out);
 		break;
@@ -72,27 +82,65 @@ switch ($_POST['call']) {
 	case 'build':
 
 		$database = $_POST['country'];
-		$collection = "complete";
+		$type = $_POST['type'];
+
+		$filters = $_POST['filters'];
+		$options = $_POST['options'];
+
+		$testhandle = fopen("/var/www/html/aiddata/DAT/data/test.csv", "w");
+
+		$collection = "projects";
+		if ($type == "old") {
+			$collection = "complete";
+		}
 		
 		$m = new MongoClient();
 
 		$db = $m->selectDB($database);
 
-		$col = $db->$collection;
-		$data = iterator_to_array($col->find());
+		$col = $db->selectCollection($collection);
 
-		$file = fopen("data/results/test.csv", "w");
+
+		// $js = $_POST['query'];
+		// $query = array('$where' => $js);
+
+
+		$sub_query2 = array();
+		foreach ($filters as $k => $v) {
+			$strings = array_map('strval', $options[$k]);
+			$ints = array_map('intval', $options[$k]);
+			$options = array_merge($strings, $ints);
+
+			$sub_query2[] = array( $v => array('$in' => $options) );
+
+		}
+
+
+		$query2 = array('$or' => $sub_query2);
+		fwrite( $testhandle, json_encode($query2) );
+
+		// array('$or' => array(
+		//   array("x" => array(1,2,3)),
+		//   array("y" => array(1,2,3))
+		// ));
+		
+		$cursor = $col->find($query2);
+
+		$time = time();
+		$file = fopen("/var/www/html/aiddata/DAT/data/".$time.".csv", "w");
 
 		$c = 0;
-		foreach ($data as $row) {
-		 	array_shift($row);
+		foreach ($cursor as $item) {
+    	    $row = (array) $item;
+            array_shift($row_raw);
 		 	if ($c == 0) {
 		    	fputcsv($file, array_keys($row));
 		    	$c = 1;
 		 	}
-		 	fputcsv($file, $row);
-		}
-		$out = "done";
+		 	fputcsv($file, array_values($row));
+	    }
+
+		$out = $time;
 		echo json_encode($out);
 		break;
 
