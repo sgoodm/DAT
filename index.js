@@ -1,20 +1,27 @@
 $(document).ready(function(){
-	
+
+	var page_url = "http://128.239.119.254/aiddata/DAT";	
+
 	var s, p = {
 		country:"",
 		type:"",
-		aggregation:"None",
+		aggregate:"none",
+		subaggregate:"none",
 		filters:[],
 		options:[],
-		query:""
+		query:"",
+		request:0
 	};
 
 	var andor = " || ";
 
+	var agg_list = ["none", "donors", "ad_sector_names", "status", ];
+
+
 	$('#country').val("-----");
 
 	$('#country').on('change', function(){
-		
+
 		var $blank = $('#blank_country_option');
 		if ($blank.length){ 
 			$blank.remove(); 
@@ -39,30 +46,42 @@ $(document).ready(function(){
 
 	$('#load button').click(function(){
 
+		var fields, agg_html, field_html;
+
+		if (p.country == "") {
+			console.log("please select a country");
+			return;
+		}
+
 		$(".blank").each(function(){
 			$(this).remove();
 		})
 
 
-		var fields;
 		process({call:"fields", country:p.country, type:p.type}, function (result){
 			console.log(result);
 			fields = result;
 		})
 
 		$('#aggregate').empty();
-		var agg_list = ["donors", "ad_sector_names", "status", ];
 
-		var agg_html = "";
+		agg_html = "";
 	    for (var i=0, ix=agg_list.length; i<ix; i++) {
 			agg_html += '<option value="'+ agg_list[i] +'">'+ agg_list[i] +'</option>';
-	    }   
+	    }
+
+	    agg_html += '<option id="agg_geography" value="geography" disabled>geography</option>';
 
         $('#aggregate').append(agg_html);
+		$('#subaggregate').append(agg_html);
+
+        $('#agg_geography').click(function(){
+        	alert("To aggregate data by geography, please use the Data Extraction Tool (link at bottom of page).");
+        })
 
 		$('#filter').empty();
 		$('#values').empty();
-        var field_html = "";
+        field_html = "";
 	    for (var i=0, ix=fields.length; i<ix; i++) {
 			field_html += '<label class="field"><input type="checkbox" value="'+fields[i]+'">'+fields[i]+'</label><br>';
 		}
@@ -73,7 +92,6 @@ $(document).ready(function(){
 
 			var field = $(this).val();
 			if ( $(this).prop('checked') ) {
-				console.log('on')
 				var options;
 				process({call:"options", country:p.country, type:p.type, field:field}, function (result){
 					console.log(result);
@@ -81,21 +99,20 @@ $(document).ready(function(){
 				})
 
 				// add field as group to filter values and populate with options
-				var options_html = '<div id="'+field+'"><span class="group">'+field.toUpperCase()+'</span>';
+				var options_html = '<div id="'+field+'"><span class="group">'+field.toUpperCase()+'</span><div>';
 
 	   	 		for (var i=0, ix=options.length; i<ix; i++) {
 
 	   	 			options_html += '<label class="option"><input type="checkbox" value="'+options[i]+'">'+options[i]+'</label><br>';
 
 	   	 		}
-	   	 		options_html += "</div>";
+	   	 		options_html += "</div></div>";
 
 	   	 		$('#values').append(options_html);
 
 
+  
 			} else {
-				console.log('off')
-
 				// remove field and options from filter values
 				$('#'+field).remove();
 			}
@@ -105,10 +122,25 @@ $(document).ready(function(){
 
 	})
 
+	$('#values').on('click', 'span', function(){
+			$(this).next().toggle();
+	})
 
 
 	$('#submit').click(function(){
-		p.aggregation = $('#aggregate').val();
+
+		if (p.country == "") {
+			console.log("please select a country");
+			return;
+		}
+
+		p.aggregate =  ( $('#aggregate').val() == null ? "none" : $('#aggregate').val() );
+		p.subaggregate = ( $('#subaggregate').val() == null ? "none" : $('#subaggregate').val() );
+
+		if (p.aggregate == p.subaggregate) {
+			console.log("invalid subaggregate");
+			return;
+		}
 
 		p.filters = [];
 		p.options = [];
@@ -141,14 +173,29 @@ $(document).ready(function(){
 
 		p.query += ")}";
 
+		if (p.options.length > 0 && p.aggregate != "none"){
+			p.request = 3;
+		} else if (p.options.length > 0) {
+			p.request = 2;
+		} else if (p.aggregate != "none") {
+			p.request = 1;
+		} else {
+			p.request = 0;
+		}
+
+		if (p.request == 0) {
+			console.log("select an aggregation or filter");
+			return;
+		}
+
 		s = p;
 
 		console.log(s)
 
-		process({call:"build", country:s.country, type:s.type, query:s.query, filters:s.filters, options:s.options}, function (result){
+		process({call:"build", country:s.country, type:s.type, aggregate:s.aggregate, subaggregate:s.subaggregate, query:s.query, filters:s.filters, options:s.options, request:s.request}, function (result){
 			console.log(result);
 			$('#download').empty();
-			$('#download').append('<a href="http://128.239.119.254/aiddata/DAT/data/'+result+'.csv">Download CSV</a>');
+			$('#download').append('<a href="'+page_url+'/data/'+result+'.csv">Download CSV</a>');
 		})
 
 	})

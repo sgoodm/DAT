@@ -84,14 +84,22 @@ switch ($_POST['call']) {
 		$database = $_POST['country'];
 		$type = $_POST['type'];
 
+		$aggregate = $_POST['aggregate'];
+		$subaggregate = $_POST['subaggregate'];
+
 		$filters = $_POST['filters'];
 		$options = $_POST['options'];
 
-		$testhandle = fopen("/var/www/html/aiddata/DAT/data/test.csv", "w");
+		// 0 - error, 1 - aggregate only, 2 - filter only, 3 - aggregate and filter
+		$request = $_POST['request'];
+
+		$testhandle = fopen("/var/www/html/aiddata/DAT/data/test.csv", "a");
 
 		$collection = "projects";
+		$div = 1;
 		if ($type == "old") {
 			$collection = "complete";
+			$div = '$location_count';
 		}
 		
 		$m = new MongoClient();
@@ -101,43 +109,79 @@ switch ($_POST['call']) {
 		$col = $db->selectCollection($collection);
 
 
-		// $js = $_POST['query'];
-		// $query = array('$where' => $js);
+		$query = array();
 
 
-		$sub_query2 = array();
-		foreach ($filters as $k => $v) {
-			$strings = array_map('strval', $options[$k]);
-			$ints = array_map('intval', $options[$k]);
-			$options = array_merge($strings, $ints);
+		$regex_map = function($value) {
+		    return new MongoRegex("/.*" . $value . ".*/");
+		};
 
-			$sub_query2[] = array( $v => array('$in' => $options) );
+		if ($request == 2 || $request == 3) {
+			$find = array();
+			foreach ($filters as $k => $v) {
+				$strings = array_map('strval', $options[$k]);
 
+				$strings = array_map($regex_map, $strings);
+
+				$floats = array_map('floatval', $options[$k]);
+				$sub_options = array_merge($strings, $floats);
+				fwrite( $testhandle, ($sub_options) );
+				$find[] = array( $v => array('$in' => $sub_options) );
+			}
+			$query[] = array( '$match' => array('$or' => $find) );
+		}
+
+		$agg_array = array();
+		$agg_array[$aggregate] = "$".$aggregate;
+		if ($subaggregate != "none") {
+			$agg_array[$subaggregate] = "$".$subaggregate;
 		}
 
 
-		$query2 = array('$or' => $sub_query2);
-		fwrite( $testhandle, json_encode($query2) );
+		if ($request == 1 || $request == 3) {
+			$group = array(
+				'_id' => $agg_array,
+				'commitments' => array('$sum' => array( '$divide' => array('$total_commitments', $div) ) ),
+				'disbursements' => array('$sum' => array( '$divide' => array('$total_disbursements', $div) ) )
+			);
 
-		// array('$or' => array(
-		//   array("x" => array(1,2,3)),
-		//   array("y" => array(1,2,3))
-		// ));
-		
-		$cursor = $col->find($query2);
+			$query[] = array( '$group' => $group );
+		}
+
+		fwrite( $testhandle, json_encode($query) );
+
+		$cursor = $col->aggregate($query);
 
 		$time = time();
 		$file = fopen("/var/www/html/aiddata/DAT/data/".$time.".csv", "w");
 
 		$c = 0;
-		foreach ($cursor as $item) {
+		foreach ($cursor["result"] as $item) {
     	    $row = (array) $item;
             array_shift($row_raw);
 		 	if ($c == 0) {
-		    	fputcsv($file, array_keys($row));
+		 		$array_keys = array_keys($row);
+		 		$temp_key = array_shift($array_keys);
+		 		if ($subaggregate != "none") {
+			 		array_unshift($array_keys, $subaggregate);
+
+		 		}
+		 		array_unshift($array_keys, $aggregate);
+		    	fputcsv($file, $array_keys);
 		    	$c = 1;
 		 	}
-		 	fputcsv($file, array_values($row));
+		 	$array_values = array_values($row); 
+		 	if ($request == 1 || $request == 3) {
+
+		 		$temp_val = array_shift($array_values);
+
+		 		if ($subaggregate != "none") {
+		 			array_unshift($array_values, $temp_val[$subaggregate]);
+		 		}
+		 		array_unshift($array_values, $temp_val[$aggregate]);
+
+		 	}
+		 	fputcsv($file, $array_values);
 	    }
 
 		$out = $time;

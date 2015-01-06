@@ -42,7 +42,11 @@
 
       <div id="optcol1" class="col-md-4">
             <span> Aggregation Field </span>
-            <select id="aggregate" size="5">
+            <select id="aggregate" class="aggregate" size="5">
+               <option value="-----" class="blank">please select a country</option>
+            </select>
+            <span> Sub Aggregation Field </span>
+            <select id="subaggregate" class="aggregate" size="5">
                <option value="-----" class="blank">please select a country</option>
             </select>
       </div>
@@ -74,6 +78,7 @@
          <h3>Tips</h3>
          <ul>
             <li>If you want the raw data but just a specific subset of the Release, leave the <b>Aggregation Field</b> as <i>None</i> and use the <b>Filter Field</b> and <b>Filter Options</b> to select the data you want.</li>
+            <li>To filter by date, use the start and end date filters to select a range.</li>
             <!-- <li>Tip</li> -->
          </ul>
       </div>
@@ -81,11 +86,14 @@
          <h3>Info</h3>
          <ul>
             <li>Using the <b>Aggregation Field</b> option will only return fields that can be aggregated (normally only project commitments and disbursments)</li>
+            <li>When filtering by date, the total commitments and disbursements will be given for any project active within the range. Individual transactions or totals for each year can be found in the reasearch releases.</li>
             <!-- <li>Info</li> -->
          </ul>
       </div>
    </div>
 
+    <div id="navbar_spacer"></div>
+    <?php include("/var/www/html/aiddata/home/nav.php"); ?>  
 
 
 
