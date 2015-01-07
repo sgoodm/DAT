@@ -43,19 +43,23 @@ with open (files["projects"], 'r') as projects:
 			with open (files["transactions"], 'r') as transactions:
 				transactionRead = csv.DictReader(transactions, delimiter=files["readDelim"])
 
-				row["transactions"] = {}
+				# row["transactions"] = {}
+				row["transactions"] = list() # x
 
 
 				for t_row in transactionRead:
 
 					if row["project_id"] == t_row["project_id"]:
 
-						row["transactions"][t_row["transaction_id"]] = {}
+						# row["transactions"][t_row["transaction_id"]] = {}
+						temp = {} # x
 
 						for t_key in t_row.keys():
 
-							row["transactions"][t_row["transaction_id"]][t_key] = t_row[t_key]
+							# row["transactions"][t_row["transaction_id"]][t_key] = t_row[t_key]
+							temp[t_key] = t_row[t_key] # x
 
+						row["transactions"].append(temp) # x
 
 
 			# use Decimal on fields specified in num_list
@@ -63,10 +67,19 @@ with open (files["projects"], 'r') as projects:
 				if key in num_list:
 					row[key] = Decimal(row[key])
 				elif key in sub_list:
+					sub_temp = list()
 					for sub in row[key]:
-						for sub_key in row[key][sub].keys():
+						sub_temp_x = {}
+						# for sub_key in row[key][sub].keys():
+						for sub_key in sub.keys(): # x
 							if sub_key in num_list:
-								row[key][sub][sub_key] = Decimal(row[key][sub][sub_key])
+								# row[key][sub][sub_key] = Decimal(row[key][sub][sub_key])
+								sub_temp_x[sub_key] = Decimal(sub[sub_key])
+							else:
+								sub_temp_x[sub_key] = sub[sub_key]
+						sub_temp.append(sub_temp_x)
+
+					row[key] = sub_temp
 
 			# write row to json
 			rowjson = json.dumps(row, ensure_ascii=True, use_decimal=True)

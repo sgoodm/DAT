@@ -89,7 +89,7 @@
          <h3>Tips</h3>
          <ul>
             <li>If you want the raw data but just a specific subset of the Release, leave the <b>Aggregation Field</b> as <i>None</i> and use the <b>Filter Field</b> and <b>Filter Options</b> to select the data you want.</li>
-            <li>To filter by date, use the start and end date filters to select a range.</li>
+            <li>To filter by date, use the slider to select a range.</li>
             <!-- <li>Tip</li> -->
          </ul>
       </div>
@@ -97,7 +97,7 @@
          <h3>Info</h3>
          <ul>
             <li>Using the <b>Aggregation Field</b> option will only return fields that can be aggregated (normally only project commitments and disbursments)</li>
-            <li>When filtering by date, the total commitments and disbursements will be given for any project active within the range. Individual transactions or totals for each year can be found in the reasearch releases.</li>
+            <li>When filtering by date, the total commitments and disbursements will be given for any project active within the range along with the commitments and disbursements for the selected range.</li>
             <!-- <li>Info</li> -->
          </ul>
       </div>
@@ -116,7 +116,6 @@
    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
 
    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-
 
    <script src="/aiddata/libs/dragslider.js"></script>
 
