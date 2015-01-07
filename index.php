@@ -38,6 +38,17 @@
       <button>Load Options</button>
    </div>
 
+   <div id="slider_container">
+      <div id="slider_top" class="slider_sub">
+         <div id="slider"></div>
+      </div> 
+      <div id="slider_bot" class="slider_sub">  
+         <span id="slider_min"></span>
+         <span id="slider_value"></span>
+         <span id="slider_max"></span>
+      </div>
+   </div>
+
    <div id="options" class="row">
 
       <div id="optcol1" class="col-md-4">
@@ -106,7 +117,8 @@
 
    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-   <script src="libs/jquery.csv-0.71.min.js"></script>
+
+   <script src="/aiddata/libs/dragslider.js"></script>
 
    <script src="/aiddata/libs/underscoremin.js"></script>
 

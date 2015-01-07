@@ -3,19 +3,56 @@ $(document).ready(function(){
 	var page_url = "http://128.239.119.254/aiddata/DAT";	
 
 	var s, p = {
+		status:0,
 		country:"",
 		type:"",
 		aggregate:"none",
 		subaggregate:"none",
 		filters:[],
 		options:[],
-		query:"",
-		request:0
+		// query:"",
+		request:0,
+		start_year:2000,
+		end_year:2012
 	};
 
 	var andor = " || ";
 
 	var agg_list = ["none", "donors", "ad_sector_names", "status", ];
+
+
+
+	// init year slider object
+	$('#slider').dragslider({
+		animate: true,
+		range: true,
+		rangeDrag: true,
+		min:1950,
+		max:2050,
+		step: 1,
+		values: [p.start_year, p.end_year]
+	}); 
+ 	
+ 	// init slider years ui
+    var v = $("#slider").dragslider("values")
+    $('#slider_value').text(v[0]+" - "+v[1]);
+    var min = $('#slider').dragslider('option', 'min')
+    var max = $('#slider').dragslider('option', 'max')
+    $('#slider_min').text(min);
+    $('#slider_max').text(max);
+
+    // slider events
+    $('#slider').dragslider({
+    	slide: function (event, ui) {
+	    	v = ui.values
+	        $('#slider_value').text(v[0]+" - "+v[1]);
+	   	},
+    	change: function (event, ui) {
+	        p.start_year = $("#slider").dragslider("values")[0]
+	    	p.end_year = $("#slider").dragslider("values")[1]
+    	}
+    });
+
 
 
 	$('#country').val("-----");
@@ -27,6 +64,7 @@ $(document).ready(function(){
 			$blank.remove(); 
 		}
 
+		p.status = 1;
 		p.country = $(this).val();
 
 
@@ -52,6 +90,8 @@ $(document).ready(function(){
 			console.log("please select a country");
 			return;
 		}
+
+		p.status = 2;
 
 		$(".blank").each(function(){
 			$(this).remove();
@@ -129,23 +169,23 @@ $(document).ready(function(){
 
 	$('#submit').click(function(){
 
-		if (p.country == "") {
-			console.log("please select a country");
+		if (p.country == "" || p.status == 0 || p.status == 1) {
+			console.log("please select and load a country");
 			return;
 		}
 
 		p.aggregate =  ( $('#aggregate').val() == null ? "none" : $('#aggregate').val() );
 		p.subaggregate = ( $('#subaggregate').val() == null ? "none" : $('#subaggregate').val() );
 
-		if (p.aggregate == p.subaggregate) {
+		if (p.subaggregate != "none" && p.aggregate == p.subaggregate) {
 			console.log("invalid subaggregate");
 			return;
 		}
 
 		p.filters = [];
 		p.options = [];
-		p.query = 	"function() { return (";
-		var first = true;
+		// p.query = 	"function() { return (";
+		// var first = true;
 
 		$('#values input:checkbox:checked').each(function(){
 			console.log( $(this).parent().parent().attr('id') +" "+ $(this).val() );
@@ -163,15 +203,15 @@ $(document).ready(function(){
 				}
 			}
 
-			var part = 'this.'+filter+' == '+value+' || this.'+filter+' == "'+value+'"';
+			// var part = 'this.'+filter+' == '+value+' || this.'+filter+' == "'+value+'"';
 
-			p.query += (first == true ? part : andor + part);
+			// p.query += (first == true ? part : andor + part);
 
-			first = false;
+			// first = false;
 
 		})
 
-		p.query += ")}";
+		// p.query += ")}";
 
 		if (p.options.length > 0 && p.aggregate != "none"){
 			p.request = 3;
@@ -192,7 +232,19 @@ $(document).ready(function(){
 
 		console.log(s)
 
-		process({call:"build", country:s.country, type:s.type, aggregate:s.aggregate, subaggregate:s.subaggregate, query:s.query, filters:s.filters, options:s.options, request:s.request}, function (result){
+		var query_data = {
+			call:"build", 
+			country:s.country, 
+			type:s.type, 
+			aggregate:s.aggregate, 
+			subaggregate:s.subaggregate, 
+			// query:s.query, 
+			filters:s.filters, 
+			options:s.options, 
+			request:s.request
+		};
+		
+		process(query_data, function (result){
 			console.log(result);
 			$('#download').empty();
 			$('#download').append('<a href="'+page_url+'/data/'+result+'.csv">Download CSV</a>');

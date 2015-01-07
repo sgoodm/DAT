@@ -93,6 +93,9 @@ switch ($_POST['call']) {
 		// 0 - error, 1 - aggregate only, 2 - filter only, 3 - aggregate and filter
 		$request = $_POST['request'];
 
+		$start_year = $_POST['start_year'];
+		$end_year = $_POST['end_year'];
+
 		$testhandle = fopen("/var/www/html/aiddata/DAT/data/test.csv", "a");
 
 		$collection = "projects";
@@ -116,8 +119,15 @@ switch ($_POST['call']) {
 		    return new MongoRegex("/.*" . $value . ".*/");
 		};
 
+
+		// year filter
+		// $and = array( array( 'transaction_year': array( '$gte':$start_year ) ), array( array( 'transaction_year': array( '$lte':$end_year ) ) );
+
+
 		if ($request == 2 || $request == 3) {
-			$find = array();
+			
+			// general filter
+			$or = array();
 			foreach ($filters as $k => $v) {
 				$strings = array_map('strval', $options[$k]);
 
@@ -126,9 +136,18 @@ switch ($_POST['call']) {
 				$floats = array_map('floatval', $options[$k]);
 				$sub_options = array_merge($strings, $floats);
 				fwrite( $testhandle, ($sub_options) );
-				$find[] = array( $v => array('$in' => $sub_options) );
+				$or[] = array( $v => array('$in' => $sub_options) );
 			}
-			$query[] = array( '$match' => array('$or' => $find) );
+
+			// TEMP while adding in year filter
+			$query[] = array( '$match' => array('$or' => $or) );
+			
+			// add year and general filter to $match
+			// $query[] = array( '$match' => array( '$and' => array( array('$and' => $and), array('$or' => $or) ) ) );
+
+		} else {
+			// add just year filter to $match
+			// $query[] = array( '$match' => array('$and' => $and) );
 		}
 
 		$agg_array = array();
@@ -141,8 +160,8 @@ switch ($_POST['call']) {
 		if ($request == 1 || $request == 3) {
 			$group = array(
 				'_id' => $agg_array,
-				'commitments' => array('$sum' => array( '$divide' => array('$total_commitments', $div) ) ),
-				'disbursements' => array('$sum' => array( '$divide' => array('$total_disbursements', $div) ) )
+				'total_commitments' => array('$sum' => array( '$divide' => array('$total_commitments', $div) ) ),
+				'total_disbursements' => array('$sum' => array( '$divide' => array('$total_disbursements', $div) ) )
 			);
 
 			$query[] = array( '$group' => $group );
