@@ -36,7 +36,7 @@ with open (files["projects"], 'r') as projects:
 
 		for row in projectRead:
 
-			# read in location, transaction and ancillary table
+			# read in locations, transactions and ancillary tables
 			# create new object for table
 			# fill object with table contents
 

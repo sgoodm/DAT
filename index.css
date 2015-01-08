@@ -25,6 +25,16 @@ i {
     font-family: 'Abel', sans-serif;
 }
 
+#message{
+	padding: 5px;
+	margin: 10px auto;
+	text-align: center;
+	background-color: rgb(200,200,200);
+	color: black;
+	font-size: 14px;
+
+}
+
 #load {
 	text-align: center;
 	margin:10px;
@@ -39,6 +49,19 @@ i {
 		text-align: center;
 		padding: 0 5px;
 	}
+
+	#radio_container{
+		text-align: center;
+		padding: 10px;
+	}
+
+		#radio_container input {
+			margin-left: 5px;
+			margin-right: 20px;
+			position: relative;
+			top:2px;
+
+		}
 
     #slider_container{
         /*width: 75%;*/
@@ -81,9 +104,13 @@ i {
 
 	#optcol1{}
 
+		#det_link{
+			font-size: 8px;
+		}
+
 		#optcol1 select {
 			width:80%;
-			height: 133px;
+			height: 124px;
 			margin-left: 10%;
 			padding: 10px;
 			margin-bottom: 10px;
@@ -160,6 +187,13 @@ i {
 	border-bottom-right-radius: 10px;
 	margin: 0 10px;
 }
+
+	#download a {
+		padding:5px;
+		background-color: rgb(222,222,222);
+		border: 1px solid white;
+		border-radius: 5px;
+	}
 
 #info {
 	padding:20px;

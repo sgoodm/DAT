@@ -13,7 +13,8 @@ $(document).ready(function(){
 		// query:"",
 		request:0,
 		start_year:2000,
-		end_year:2012
+		end_year:2012,
+		transaction_type:"C"
 	};
 
 	var andor = " || ";
@@ -87,7 +88,7 @@ $(document).ready(function(){
 		var fields, agg_html, field_html;
 
 		if (p.country == "") {
-			console.log("please select a country");
+			$('#message').html("please select a country");
 			return;
 		}
 
@@ -110,14 +111,14 @@ $(document).ready(function(){
 			agg_html += '<option value="'+ agg_list[i] +'">'+ agg_list[i] +'</option>';
 	    }
 
-	    agg_html += '<option id="agg_geography" value="geography" disabled>geography</option>';
+	    // agg_html += '<option class="agg_geography" value="geography" disabled><a href="/aiddata/DET/www/det.php">geography</a></option>';
 
         $('#aggregate').append(agg_html);
 		$('#subaggregate').append(agg_html);
 
-        $('#agg_geography').click(function(){
-        	alert("To aggregate data by geography, please use the Data Extraction Tool (link at bottom of page).");
-        })
+        // $('.agg_geography').click(function(){
+        // 	alert("To aggregate data by geography, please use the Data Extraction Tool (link at bottom of page).");
+        // })
 
 		$('#filter').empty();
 		$('#values').empty();
@@ -164,13 +165,14 @@ $(document).ready(function(){
 
 	$('#values').on('click', 'span', function(){
 			$(this).next().toggle();
+			console.log( $(this).parent().attr('id') );
 	})
 
 
 	$('#submit').click(function(){
 
 		if (p.country == "" || p.status == 0 || p.status == 1) {
-			console.log("please select and load a country");
+			$('#message').html("please select and load a country");
 			return;
 		}
 
@@ -178,7 +180,7 @@ $(document).ready(function(){
 		p.subaggregate = ( $('#subaggregate').val() == null ? "none" : $('#subaggregate').val() );
 
 		if (p.subaggregate != "none" && p.aggregate == p.subaggregate) {
-			console.log("invalid subaggregate");
+			$('#message').html("invalid subaggregate");
 			return;
 		}
 
@@ -188,9 +190,9 @@ $(document).ready(function(){
 		// var first = true;
 
 		$('#values input:checkbox:checked').each(function(){
-			console.log( $(this).parent().parent().attr('id') +" "+ $(this).val() );
+			console.log( $(this).parent().parent().parent().attr('id') +" "+ $(this).val() );
 
-			var filter =  $(this).parent().parent().attr('id');
+			var filter =  $(this).parent().parent().parent().attr('id');
 			var value = $(this).val();
 			var index = _.indexOf(p.filters, filter);
 
@@ -224,13 +226,15 @@ $(document).ready(function(){
 		}
 
 		if (p.request == 0) {
-			console.log("select an aggregation or filter");
+			$('#message').html("select an aggregation or filter");
 			return;
 		}
 
+		p.transaction_type = $("input[name=transaction_type]:checked").val();
+
 		s = p;
 
-		console.log(s)
+		console.log(s);
 
 		var query_data = {
 			call:"build", 
@@ -241,13 +245,17 @@ $(document).ready(function(){
 			// query:s.query, 
 			filters:s.filters, 
 			options:s.options, 
-			request:s.request
+			request:s.request,
+			start_year:s.start_year,
+			end_year:s.end_year,
+			transaction_type:s.transaction_type
 		};
 		
 		process(query_data, function (result){
 			console.log(result);
 			$('#download').empty();
 			$('#download').append('<a href="'+page_url+'/data/'+result+'.csv">Download CSV</a>');
+			$('#message').html("Request completed");
 		})
 
 	})

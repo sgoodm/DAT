@@ -26,33 +26,46 @@
       Data Access Tool
    </div>
 
+   <div id="message">please select a country</div>
+
+
    <div id="load" class="row">
       <span> Select a Country: </span>
       <select id="country" >
          <option id="blank_country_option" value="-----" class="blank">-----</option>
-         <option value="Nepal">Nepal</option>
+        <!--  <option value="Nepal">Nepal</option>
          <option value="Uganda">Uganda</option>
-         <option value="Malawi">Malawi</option> 
+         <option value="Malawi">Malawi</option>  -->
          <option value="Senegal">Senegal</option>  
       </select>
       <button>Load Options</button>
    </div>
 
-   <div id="slider_container">
-      <div id="slider_top" class="slider_sub">
-         <div id="slider"></div>
-      </div> 
-      <div id="slider_bot" class="slider_sub">  
-         <span id="slider_min"></span>
-         <span id="slider_value"></span>
-         <span id="slider_max"></span>
+   <div>
+
+      <div id="radio_container">
+         <label>Commitments<input type="radio" name="transaction_type" value="C" checked></label>
+         <label>Disbursements<input type="radio" name="transaction_type" value="D"></label>
       </div>
+
+      <div id="slider_container">
+         <div id="slider_top" class="slider_sub">
+            <div id="slider"></div>
+         </div> 
+         <div id="slider_bot" class="slider_sub">  
+            <span id="slider_min"></span>
+            <span id="slider_value"></span>
+            <span id="slider_max"></span>
+         </div>
+      </div>
+
    </div>
 
    <div id="options" class="row">
 
       <div id="optcol1" class="col-md-4">
             <span> Aggregation Field </span>
+            <span id="det_link">(to aggregate by geography use <a href="/aiddata/DET/www/det.php">THIS</a> tool)</span>
             <select id="aggregate" class="aggregate" size="5">
                <option value="-----" class="blank">please select a country</option>
             </select>
@@ -97,7 +110,7 @@
          <h3>Info</h3>
          <ul>
             <li>Using the <b>Aggregation Field</b> option will only return fields that can be aggregated (normally only project commitments and disbursments)</li>
-            <li>When filtering by date, the total commitments and disbursements will be given for any project active within the range along with the commitments and disbursements for the selected range.</li>
+            <li>When filtering by date, the total commitments and disbursements will be given for any project active within the range along with the commitments or disbursements for the selected range.</li>
             <!-- <li>Info</li> -->
          </ul>
       </div>
