@@ -29,24 +29,26 @@ sub_list = {
 	"transactions"
 }
 
+# read in main projects file
 with open (files["projects"], 'r') as projects:
 	projectRead = csv.DictReader(projects, delimiter=files["readDelim"])
 
+	# open JSON file for writing
 	with open (files["complete"], 'w') as writeJSON:
 
+		# add new data for each project
 		for row in projectRead:
 
-			# read in locations, transactions and ancillary tables
-			# create new object for table
-			# fill object with table contents
 
+			# read in transactions tables (will also work for locations / ancillary tables)
 			with open (files["transactions"], 'r') as transactions:
 				transactionRead = csv.DictReader(transactions, delimiter=files["readDelim"])
 
+				# create new array for table
 				# row["transactions"] = {}
 				row["transactions"] = list() # x
 
-
+				# fill object with table contents
 				for t_row in transactionRead:
 
 					if row["project_id"] == t_row["project_id"]:

@@ -63,7 +63,7 @@
 
    <div id="options" class="row">
 
-      <div id="optcol1" class="col-md-4">
+      <div id="optcol1" class="col-md-3">
             <span> Aggregation Field </span>
             <span id="det_link">(to aggregate by geography use <a href="/aiddata/DET/www/det.php">THIS</a> tool)</span>
             <select id="aggregate" class="aggregate" size="5">
@@ -75,14 +75,14 @@
             </select>
       </div>
 
-      <div id="optcol2" class="col-md-4">
+      <div id="optcol2" class="col-md-3">
          <span> Filter Field </span>
          <div id="filter" >
             <label class="blank"><input type="checkbox" value="-----">please select a country</label>
          </div>
       </div>
 
-      <div id="optcol3" class="col-md-4">
+      <div id="optcol3" class="col-md-6">
          <span> Filter Options </span>
          <div id="values" >
             <span value="-----" class="blank group">please select a country</span>

@@ -124,7 +124,7 @@ $(document).ready(function(){
 		$('#values').empty();
         field_html = "";
 	    for (var i=0, ix=fields.length; i<ix; i++) {
-			field_html += '<label class="field"><input type="checkbox" value="'+fields[i]+'">'+fields[i]+'</label><br>';
+			field_html += '<label class="field"><input type="checkbox" value="'+fields[i]+'">'+fields[i]+'</label>';
 		}
 		$('#filter').append(field_html);
 
@@ -144,7 +144,7 @@ $(document).ready(function(){
 
 	   	 		for (var i=0, ix=options.length; i<ix; i++) {
 
-	   	 			options_html += '<label class="option"><input type="checkbox" value="'+options[i]+'">'+options[i]+'</label><br>';
+	   	 			options_html += '<label class="option"><input type="checkbox" value="'+options[i]+'">'+options[i]+'</label>';
 
 	   	 		}
 	   	 		options_html += "</div></div>";
@@ -225,10 +225,10 @@ $(document).ready(function(){
 			p.request = 0;
 		}
 
-		if (p.request == 0) {
-			$('#message').html("select an aggregation or filter");
-			return;
-		}
+		// if (p.request == 0) {
+		// 	$('#message').html("select an aggregation or filter");
+		// 	return;
+		// }
 
 		p.transaction_type = $("input[name=transaction_type]:checked").val();
 
@@ -254,8 +254,14 @@ $(document).ready(function(){
 		process(query_data, function (result){
 			console.log(result);
 			$('#download').empty();
-			$('#download').append('<a href="'+page_url+'/data/'+result+'.csv">Download CSV</a>');
-			$('#message').html("Request completed");
+			if (result != "no data") {
+				$('#download').append('<a href="'+page_url+'/data/'+result+'.csv">Download CSV</a>');
+				$('#message').html("Request completed");
+			} else {
+				$('#message').html("No data found");
+	        	$('html, body').animate({ scrollTop: 0 }, 0);
+			}
+			
 		})
 
 	})

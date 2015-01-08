@@ -208,57 +208,68 @@ switch ($_POST['call']) {
 
 		fwrite( $testhandle2, json_encode($cursor) );
 
-		//build csv
 
-		$time = time();
-		$file = fopen("/var/www/html/aiddata/DAT/data/".$time.".csv", "w");
+		//build csv if query produced results
+		if ( count($cursor["result"]) > 0 ) {
 
-		$c = 0;
-		foreach ($cursor["result"] as $item) {
-    	    $row = (array) $item;
+			$time = time();
+			$file = fopen("/var/www/html/aiddata/DAT/data/".$time.".csv", "w");
 
-    	    $array_values = array_values($row); 
+			$c = 0;
+			foreach ($cursor["result"] as $item) {
+	    	    $row = (array) $item;
 
-            if ($request == 2) {
-	    	    
-	    	    // get rid of mongo _id field
-           		array_shift($row);
+	    	    $array_values = array_values($row); 
 
-           		// manage csv header
-			 	if ($c == 0) {
-			 		$array_keys = array_keys($row);
-			    	fputcsv($file, $array_keys);
-			    	$c = 1;
-			 	}
+	            if ($request == 2 || $request == 0) {
+		    	    
+		    	    // get rid of mongo _id field
+	           		array_shift($row);
 
-           	} else {
-           		
-           		// manage csv header
-			 	if ($c == 0) {
-			 		$array_keys = array_keys($row);
-			 		$temp_key = array_shift($array_keys);
+	           		// manage csv header
+				 	if ($c == 0) {
+				 		$array_keys = array_keys($row);
+				    	fputcsv($file, $array_keys);
+				    	$c = 1;
+				 	}
+
+				 	// get rid of extra mongo _id field
+				 	array_shift($array_values);
+				 	
+
+	           	} else {
+	           		
+	           		// manage csv header
+				 	if ($c == 0) {
+				 		$array_keys = array_keys($row);
+				 		$temp_key = array_shift($array_keys);
+				 		if ($subaggregate != "none") {
+					 		array_unshift($array_keys, $subaggregate);
+				 		}
+				 		array_unshift($array_keys, $aggregate);
+				    	fputcsv($file, $array_keys);
+				    	$c = 1;
+				 	}
+
+			 		$temp_val = array_shift($array_values);
+
 			 		if ($subaggregate != "none") {
-				 		array_unshift($array_keys, $subaggregate);
+			 			array_unshift($array_values, $temp_val[$subaggregate]);
 			 		}
-			 		array_unshift($array_keys, $aggregate);
-			    	fputcsv($file, $array_keys);
-			    	$c = 1;
-			 	}
 
-		 		$temp_val = array_shift($array_values);
+			 		array_unshift($array_values, $temp_val[$aggregate]);
+			 	
+	           	}
+			 	
+			 	fputcsv($file, $array_values);
+		    }
 
-		 		if ($subaggregate != "none") {
-		 			array_unshift($array_values, $temp_val[$subaggregate]);
-		 		}
+			$out = $time;
 
-		 		array_unshift($array_values, $temp_val[$aggregate]);
-		 	
-           	}
-		 	
-		 	fputcsv($file, $array_values);
-	    }
+		} else {
+			$out = "no data";
+		}
 
-		$out = $time;
 		echo json_encode($out);
 		break;
 
