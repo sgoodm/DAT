@@ -4,15 +4,19 @@ import simplejson as json
 from decimal import *
 # import pymongo
 
-# mongoimport --db Senegal --collection complete --type json --file /home/detuser/Desktop/aiddata_releases/Senegal/complete.json
+# mongoimport --db Senegal --collection complete --type json --file /home/user/Desktop/data/Senegal/complete.json
+
+# folder data is located in. example: /home/user/Desktop/data/Senegal
+in_folder = sys.argv[1]
+
 
 files = {
 
-	"projects" : '/home/detuser/Desktop/aiddata_releases/Senegal/projects.tsv',
-	"locations" : '/home/detuser/Desktop/aiddata_releases/Senegal/locations.tsv',
-	"transactions" : '/home/detuser/Desktop/aiddata_releases/Senegal/transactions.tsv',
-	"ancillary" : '/home/detuser/Desktop/aiddata_releases/Senegal/ancillary.tsv',
-	"complete" : '/home/detuser/Desktop/aiddata_releases/Senegal/complete.json',
+	"projects" : in_folder + '/projects.tsv',
+	"locations" : in_folder + '/locations.tsv',
+	"transactions" : in_folder + '/transactions.tsv',
+	"ancillary" : in_folder + '/ancillary.tsv',
+	"complete" : in_folder + '/complete.json',
 	"readDelim" : '\t'
 }
 
@@ -20,11 +24,15 @@ num_list = {
 	"total_commitments",
 	"total_disbursements",
 	"transaction_value",
-	"transaction_year"
+	"transaction_year",
+	"precision_code",
+	"latitude",
+	"longitude"
 }
 
 sub_list = {
-	"transactions"
+	"transactions",
+	"locations"
 }
 
 # read in main projects file
@@ -38,28 +46,46 @@ with open (files["projects"], 'r') as projects:
 		for row in projectRead:
 
 
-			# read in transactions tables (will also work for locations / ancillary tables)
+			# read in transactions table
 			with open (files["transactions"], 'r') as transactions:
 				transactionRead = csv.DictReader(transactions, delimiter=files["readDelim"])
 
 				# create new array for table
-				# row["transactions"] = {}
-				row["transactions"] = list() # x
+				row["transactions"] = list()
 
 				# fill object with table contents
 				for t_row in transactionRead:
 
 					if row["project_id"] == t_row["project_id"]:
 
-						# row["transactions"][t_row["transaction_id"]] = {}
-						temp = {} # x
+						temp = {}
 
 						for t_key in t_row.keys():
 
-							# row["transactions"][t_row["transaction_id"]][t_key] = t_row[t_key]
-							temp[t_key] = t_row[t_key] # x
+							temp[t_key] = t_row[t_key]
 
-						row["transactions"].append(temp) # x
+						row["transactions"].append(temp)
+
+
+			# read in locations table
+			with open (files["locations"], 'r') as locations:
+				locationRead = csv.DictReader(locations, delimiter=files["readDelim"])
+
+				# create new array for table
+				row["locations"] = list()
+
+				# fill object with table contents
+				for loc_row in locationRead:
+
+					if row["project_id"] == loc_row["project_id"]:
+
+						loc_temp = {}
+
+						for loc_key in loc_row.keys():
+
+							loc_temp[loc_key] = loc_row[loc_key]
+
+						row["locations"].append(loc_temp)
 
 
 			# use Decimal on fields specified in num_list
@@ -70,10 +96,8 @@ with open (files["projects"], 'r') as projects:
 					sub_temp = list()
 					for sub in row[key]:
 						sub_temp_x = {}
-						# for sub_key in row[key][sub].keys():
-						for sub_key in sub.keys(): # x
+						for sub_key in sub.keys():
 							if sub_key in num_list:
-								# row[key][sub][sub_key] = Decimal(row[key][sub][sub_key])
 								sub_temp_x[sub_key] = Decimal(sub[sub_key])
 							else:
 								sub_temp_x[sub_key] = sub[sub_key]
@@ -83,5 +107,5 @@ with open (files["projects"], 'r') as projects:
 
 			# write row to json
 			rowjson = json.dumps(row, ensure_ascii=True, use_decimal=True)
-	 		writeJSON.write(rowjson+"\n")
+	 		writeJSON.write( rowjson + "\n" )
 
