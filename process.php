@@ -92,6 +92,13 @@ switch ($_POST['call']) {
 		$filters = $_POST['filters'];
 		$options = $_POST['options'];
 
+		$filter_type_options = array(
+								"or" => '$or',
+								"and" => '$and'
+							);
+
+		$filter_type = $filter_type_options[$_POST["filter_type"]];
+
 		// 0 - error, 1 - aggregate only, 2 - filter only, 3 - aggregate and filter
 		$request = $_POST['request'];
 
@@ -131,9 +138,8 @@ switch ($_POST['call']) {
 
 		// general filter
 		if ($request == 2 || $request == 3) {
-			
 
-			$or = array();
+			$andor = array();
 			foreach ($filters as $k => $v) {
 				$strings = array_map('strval', $options[$k]);
 
@@ -142,10 +148,10 @@ switch ($_POST['call']) {
 				$floats = array_map('floatval', $options[$k]);
 				$sub_options = array_merge($strings, $floats);
 				fwrite( $testhandle, ($sub_options) );
-				$or[] = array( $v => array('$in' => $sub_options) );
+				$andor[] = array( $v => array('$in' => $sub_options) );
 			}
 
-			$query[] = array( '$match' => array('$or' => $or) );
+			$query[] = array( '$match' => array($filter_type => $andor) );
 			
 		} 
 

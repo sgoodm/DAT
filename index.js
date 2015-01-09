@@ -1,6 +1,6 @@
 $(document).ready(function(){
 
-	var page_url = "http://128.239.119.254/aiddata/DAT";	
+	var page_url = "http://da.aiddata.wm.edu/aiddata/DAT";	
 
 	var s, p = {
 		status:0,
@@ -10,6 +10,7 @@ $(document).ready(function(){
 		subaggregate:"none",
 		filters:[],
 		options:[],
+		filter_type:"or",
 		// query:"",
 		request:0,
 		start_year:2000,
@@ -231,6 +232,7 @@ $(document).ready(function(){
 		// }
 
 		p.transaction_type = $("input[name=transaction_type]:checked").val();
+		p.filter_type = $("input[name=filter_type]:checked").val();
 
 		s = p;
 
@@ -245,6 +247,7 @@ $(document).ready(function(){
 			// query:s.query, 
 			filters:s.filters, 
 			options:s.options, 
+			filter_type:s.filter_type,
 			request:s.request,
 			start_year:s.start_year,
 			end_year:s.end_year,

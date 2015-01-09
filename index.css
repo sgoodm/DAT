@@ -50,12 +50,12 @@ i {
 		padding: 0 5px;
 	}
 
-	#radio_container{
+	#transaction_radio_container{
 		text-align: center;
 		padding: 10px;
 	}
 
-		#radio_container input {
+		#transaction_radio_container input {
 			margin-left: 5px;
 			margin-right: 20px;
 			position: relative;
@@ -129,6 +129,11 @@ i {
 			padding:10px;
 			overflow: auto;
 		}
+
+		#values {
+			height: 272px;
+		}
+
 			#filter input {
 				position: relative;
 				top:1px;
@@ -169,6 +174,20 @@ i {
 			.field input, .option input {
 				display: inline-block;
 			}
+
+			#filter_radio_container {
+				text-align: center;
+				position: relative;
+				left: 10px; 
+			}
+
+				#filter_radio_container input {
+					margin-left: 5px;
+					margin-right: 15px;
+					position: relative;
+					top:2px;
+
+				}
 
 
 #export {

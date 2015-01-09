@@ -1,11 +1,9 @@
-import struct
 import sys
 import csv
 import simplejson as json
-import numpy	
-import pymongo
 from decimal import *
- 
+# import pymongo
+
 # mongoimport --db Senegal --collection complete --type json --file /home/detuser/Desktop/aiddata_releases/Senegal/complete.json
 
 files = {

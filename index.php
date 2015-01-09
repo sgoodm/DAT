@@ -43,7 +43,7 @@
 
    <div>
 
-      <div id="radio_container">
+      <div id="transaction_radio_container">
          <label>Commitments<input type="radio" name="transaction_type" value="C" checked></label>
          <label>Disbursements<input type="radio" name="transaction_type" value="D"></label>
       </div>
@@ -84,6 +84,10 @@
 
       <div id="optcol3" class="col-md-6">
          <span> Filter Options </span>
+         <div id="filter_radio_container">
+            <label>Or<input type="radio" name="filter_type" value="or" checked></label>
+            <label>And<input type="radio" name="filter_type" value="and"></label>
+         </div>
          <div id="values" >
             <span value="-----" class="blank group">please select a country</span>
          </div>
