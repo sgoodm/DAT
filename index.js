@@ -77,6 +77,7 @@ $(document).ready(function(){
 				p.type = "old";
 				break;
 			case 'Senegal':
+			case 'Timor-Leste':
 				p.type = "new";
 				break;
 		}
@@ -99,13 +100,14 @@ $(document).ready(function(){
 			$(this).remove();
 		})
 
-
+		console.log(p.type)
 		process({call:"fields", country:p.country, type:p.type}, function (result){
 			console.log(result);
 			fields = result;
 		})
 
 		$('#aggregate').empty();
+		$('#subaggregate').empty();
 
 		agg_html = "";
 	    for (var i=0, ix=agg_list.length; i<ix; i++) {
@@ -125,7 +127,9 @@ $(document).ready(function(){
 		$('#values').empty();
         field_html = "";
 	    for (var i=0, ix=fields.length; i<ix; i++) {
-			field_html += '<label class="field"><input type="checkbox" value="'+fields[i]+'">'+fields[i]+'</label>';
+	    	if (fields[i] != "transactions" && fields[i] != "locations") {
+				field_html += '<label class="field"><input type="checkbox" value="'+fields[i]+'">'+fields[i]+'</label>';
+			}
 		}
 		$('#filter').append(field_html);
 

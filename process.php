@@ -18,10 +18,10 @@ switch ($_POST['call']) {
 		$database = $_POST['country'];
 		$type = $_POST['type'];
 
-		$collection = "projects";
-		if ($type == "old") {
+		// $collection = "projects";
+		// if ($type == "old") {
 			$collection = "complete";
-		}
+		// }
 
 		$m = new MongoClient();
 
@@ -49,10 +49,10 @@ switch ($_POST['call']) {
 		$type = $_POST['type'];
 		$field = $_POST['field'];
 
-		$collection = "projects";
-		if ($type == "old") {
+		// $collection = "projects";
+		// if ($type == "old") {
 			$collection = "complete";
-		}
+		// }
 
 		$m = new MongoClient();
 

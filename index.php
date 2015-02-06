@@ -37,6 +37,8 @@
          <option value="Uganda">Uganda</option>
          <option value="Malawi">Malawi</option>  -->
          <option value="Senegal">Senegal</option>  
+         <option value="Timor-Leste">Timor-Leste</option>  
+
       </select>
       <button>Load Options</button>
    </div>
