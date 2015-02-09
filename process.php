@@ -16,7 +16,7 @@ switch ($_POST['call']) {
 	// return list of fields for selected country
 	case "fields":
 		$database = $_POST['country'];
-		$type = $_POST['type'];
+		// $type = $_POST['type'];
 
 		// $collection = "projects";
 		// if ($type == "old") {
@@ -46,7 +46,7 @@ switch ($_POST['call']) {
 	// return options for specific field
 	case "options":
 		$database = $_POST['country'];
-		$type = $_POST['type'];
+		// $type = $_POST['type'];
 		$field = $_POST['field'];
 
 		// $collection = "projects";
