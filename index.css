@@ -104,17 +104,31 @@ i {
 
 	#optcol1{}
 
-		#det_link{
-			font-size: 8px;
-		}
-
 		#optcol1 select {
 			width:80%;
-			height: 124px;
+			/*height: 77px;*/
+			/*padding: 10px;*/
+			padding: 0 10px;
 			margin-left: 10%;
-			padding: 10px;
 			margin-bottom: 10px;
 		}
+
+		#precision {
+			height: 110px;
+			background: rgb(255,255,255);
+			color:black;
+			width: 80%;
+			margin-left: 10%;
+			padding: 0 10px;
+			overflow: auto;
+		}
+
+			#precision input {
+				position: relative;
+				margin-right: 5px;
+				margin-bottom: 0;
+			}
+
 
 
 	#optcol2{}

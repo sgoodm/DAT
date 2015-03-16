@@ -67,14 +67,34 @@
 
       <div id="optcol1" class="col-md-3">
             <span> Aggregation Field </span>
-            <span id="det_link">(to aggregate by geography use <a href="/aiddata/DET/www/det.php">THIS</a> tool)</span>
-            <select id="aggregate" class="aggregate" size="5">
+            <!-- <span id="det_link">(to aggregate by geography use <a href="/aiddata/DET/www/det.php">THIS</a> tool)</span> -->
+            <select id="aggregate" class="aggregate">
                <option value="-----" class="blank">please select a country</option>
             </select>
+
             <span> Sub Aggregation Field </span>
-            <select id="subaggregate" class="aggregate" size="5">
+            <select id="subaggregate" class="aggregate" disabled>
                <option value="-----" class="blank">please select a country</option>
             </select>
+
+            <span> Geo Aggregation Level </span>
+            <select id="geoaggregate" class="aggregate" disabled>
+               <option value="1">adm1</option>
+               <option value="2">adm2</option>
+            </select>
+
+            <span> Precision Codes </span>
+            <div id="precision" >
+               <label class="option"><input class="precision_op" type="checkbox" value="1" checked disabled>1</label>
+               <label class="option"><input class="precision_op" type="checkbox" value="2" checked disabled>2</label>
+               <label class="option"><input class="precision_op" type="checkbox" value="3" checked disabled>3</label>
+               <label class="option"><input class="precision_op" type="checkbox" value="4" checked disabled>4</label>
+               <label class="option"><input class="precision_op" type="checkbox" value="5" checked disabled>5</label>
+               <label class="option"><input class="precision_op" type="checkbox" value="6" checked disabled>6</label>
+               <label class="option"><input class="precision_op" type="checkbox" value="7" checked disabled>7</label>
+               <label class="option"><input class="precision_op" type="checkbox" value="8" checked disabled>8</label>
+               <label class="option"><input class="precision_op" type="checkbox" value="9" checked disabled>9</label>
+            </div>
       </div>
 
       <div id="optcol2" class="col-md-3">

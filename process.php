@@ -2,6 +2,16 @@
 set_time_limit(0);
 
 switch ($_POST['call']) {
+	
+	// check if a file exists
+	case 'exists':
+		$name = $_POST['name'];
+		if ( file_exists("/var/www/html/aiddata/".$name) ) {
+			echo "true";
+		} else {
+			echo "false";
+		}
+		break;
 
 	// returns directory contents
 	case 'scan':
@@ -88,6 +98,7 @@ switch ($_POST['call']) {
 
 		$aggregate = $_POST['aggregate'];
 		$subaggregate = $_POST['subaggregate'];
+		$geoaggregate = $_POST['geoaggregate'];
 
 		$filters = $_POST['filters'];
 		$options = $_POST['options'];
@@ -107,24 +118,18 @@ switch ($_POST['call']) {
 
 		$transaction_type = $_POST['transaction_type'];
 
-		$testhandle = fopen("/var/www/html/aiddata/DAT/data/test.csv", "w");
-		$testhandle2 = fopen("/var/www/html/aiddata/DAT/data/test2.csv", "w");
+		// $testhandle = fopen("/var/www/html/aiddata/DAT/data/test.csv", "w");
+		// $testhandle2 = fopen("/var/www/html/aiddata/DAT/data/test2.csv", "w");
 
 
-		// $collection = "projects";
 		$div = 1;
-		// if ($type == "old") {
-		// 	$collection = "complete";
-		// 	$div = '$location_count';
-		// }
+
 		$collection = "complete";
 
 
 		// init mongo
 		$m = new MongoClient();
-
 		$db = $m->selectDB($database);
-
 		$col = $db->selectCollection($collection);
 
 
@@ -136,7 +141,7 @@ switch ($_POST['call']) {
 		    return new MongoRegex("/.*" . $value . ".*/");
 		};
 
-		// general filter
+		// general (project) filter
 		if ($request == 2 || $request == 3) {
 
 			$andor = array();
@@ -155,49 +160,108 @@ switch ($_POST['call']) {
 			
 		} 
 
+
+
+
 		// unwind transactions
 		$query[] = array( '$unwind' => '$transactions' );
 
 		// transactions filter
-		$query[] = array( 
+		$query[] = array(
 							'$match' => array(
-												'transactions.transaction_value_code' => $transaction_type, 
-												'transactions.transaction_year' => array( '$gte' => $start_year, '$lte' => $end_year ) 
+												'transactions.transaction_value_code' => $transaction_type,
+												'transactions.transaction_year' => array( '$gte' => $start_year, '$lte' => $end_year )
 											)
 						);
 
+
+
+
+		$group_list = array(  
+								'_id' => '$project_id', 
+								'project_id' => array( '$last' => '$project_id' ), 
+								'is_geocoded' => array( '$last' => '$is_geocoded' ),	
+								'project_title' => array( '$last' => '$project_title' ),	
+								'start_actual_isodate' => array( '$last' => '$start_actual_isodate' ),	
+								'start_actual_type' => array( '$last' => '$start_actual_type' ),	
+								'end_actual_isodate' => array( '$last' => '$end_actual_isodate' ),	
+								'end_actual_type' => array( '$last' => '$end_actual_type' ),	
+								'donors' => array( '$last' => '$donors' ), 
+								'donors_iso3' => array( '$last' => '$donors_iso3' ),
+								'sector_name_trans' => array( '$last' => '$sector_name_trans' ), 	
+								'ad_sector_codes' => array( '$last' => '$ad_sector_codes' ), 
+								'ad_sector_names' => array( '$last' => '$ad_sector_names' ),	 
+								'status' => array( '$last' => '$status' ), 
+								'total_commitments' => array( '$last' => '$total_commitments' ),	
+								'total_disbursements' => array( '$last' => '$total_disbursements' ),
+								'transaction_sum' => array( '$sum' => '$transactions.transaction_value' ) 
+							);
+
+		// add locations to group_list for geo agg
+	 	if ( ($request == 1 || $request == 3) && $aggregate == "geography" ) {
+
+	 		$group_list['locations'] = array( '$last' => '$locations' );
+
+	 	}
+
+
 		// group transactions
-		$query[] = array( 
-							'$group' => array(  
-												'_id' => '$project_id', 
-												'project_id' => array( '$last' => '$project_id' ), 
-												'is_geocoded' => array( '$last' => '$is_geocoded' ),	
-												'project_title' => array( '$last' => '$project_title' ),	
-												'start_actual_isodate' => array( '$last' => '$start_actual_isodate' ),	
-												'start_actual_type' => array( '$last' => '$start_actual_type' ),	
-												'end_actual_isodate' => array( '$last' => '$end_actual_isodate' ),	
-												'end_actual_type' => array( '$last' => '$end_actual_type' ),	
-												'donors' => array( '$last' => '$donors' ), 
-												'donors_iso3' => array( '$last' => '$donors_iso3' ),
-												'sector_name_trans' => array( '$last' => '$sector_name_trans' ), 	
-												'ad_sector_codes' => array( '$last' => '$ad_sector_codes' ), 
-												'ad_sector_names' => array( '$last' => '$ad_sector_names' ),	 
-												'status' => array( '$last' => '$status' ), 
-												'total_commitments' => array( '$last' => '$total_commitments' ),	
-												'total_disbursements' => array( '$last' => '$total_disbursements' ),
-												'transaction_sum' => array( '$sum' => '$transactions.transaction_value' ) 
-											) 
-						);
+		$query[] = array( '$group' => $group_list );
 
 
-		// aggregate 
-		$agg_array = array();
-		$agg_array[$aggregate] = "$".$aggregate;
-		if ($subaggregate != "none") {
-			$agg_array[$subaggregate] = "$".$subaggregate;
+
+	 	if ( ($request == 1 || $request == 3) && $aggregate == "geography" ) {
+
+			// unwind locations for geo agg
+			$query[] = array( '$unwind' => '$locations' );
+
+
+
+			// pass specific fields
+			$project_list = array(  
+									'project_id' => 1, 
+									'longitude' => '$locations.longitude',	
+									'latitude' => '$locations.latitude',
+									'location_count' => '$locations.location_count',
+									'precision_code' => '$locations.precision_code',
+									'total_commitments' => 1,
+									'total_disbursements' => 1,
+									'transaction_sum' => 1 
+								);
+
+			$query[] = array( '$project' => $project_list );
+
+
+
+			// filter based on precision code
+			$precision_codes = $_POST['precision_codes'];
+
+			$precision_list = array();
+			foreach ($precision_codes as $v) {
+				$precision_list[] = $v;
+				$precision_list[] = intval($v);
+			}
+
+			$query[] = array(
+								'$match' => array( 'precision_code' => array( '$in' => $precision_list ) )
+							);
+
+
 		}
 
-		if ($request == 1 || $request == 3) {
+
+
+		// aggregate using mongo for non geo agg
+		if ( ($request == 1 || $request == 3) && $aggregate != "geography" ) {
+
+			$agg_array = array();
+
+			$agg_array[$aggregate] = "$".$aggregate;
+			
+			if ($subaggregate != "none") {
+				$agg_array[$subaggregate] = "$".$subaggregate;
+			}
+
 			$group = array(
 							'_id' => $agg_array,
 							'total_commitments' => array('$sum' => array( '$divide' => array('$total_commitments', $div) ) ),
@@ -206,13 +270,17 @@ switch ($_POST['call']) {
 						);
 
 			$query[] = array( '$group' => $group );
+
 		}
 
-		fwrite( $testhandle, json_encode($query) );
+
+
+
+		// fwrite( $testhandle, json_encode($query) );
 
 		$cursor = $col->aggregate($query);
 
-		fwrite( $testhandle2, json_encode($cursor) );
+		// fwrite( $testhandle2, json_encode($cursor) );
 
 
 		//build csv if query produced results
@@ -227,7 +295,7 @@ switch ($_POST['call']) {
 
 	    	    $array_values = array_values($row); 
 
-	            if ($request == 2 || $request == 0) {
+	            if ($request == 2 || $request == 0 || $aggregate == "geography") {
 		    	    
 		    	    // get rid of mongo _id field
 	           		array_shift($row);
@@ -271,6 +339,14 @@ switch ($_POST['call']) {
 		    }
 
 			$out = $time;
+
+			// call python geo aggregation script
+			if ( $aggregate == "geography" ) {
+				$directory = dirname(__FILE__); 
+				$exec_str = "python ".$directory."/geoagg.py ".$database." ".$geoaggregate." ".$out;
+				exec($exec_str);
+				$out = $out ."_geoagg";
+			}
 
 		} else {
 			$out = "no data";

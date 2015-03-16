@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	$('html, body').animate({ scrollTop: 0 }, 0);
 
 	var page_url = "http://da.aiddata.wm.edu/aiddata/DAT";	
 
@@ -8,6 +9,8 @@ $(document).ready(function(){
 		type:"",
 		aggregate:"none",
 		subaggregate:"none",
+		geoaggregate:'adm1',
+		precision_codes:[],
 		filters:[],
 		options:[],
 		filter_type:"or",
@@ -119,9 +122,37 @@ $(document).ready(function(){
         $('#aggregate').append(agg_html);
 		$('#subaggregate').append(agg_html);
 
-        // $('.agg_geography').click(function(){
-        // 	alert("To aggregate data by geography, please use the Data Extraction Tool (link at bottom of page).");
-        // })
+	    $('#aggregate').append('<option class="agg_geography" value="geography">geography</option>');
+
+        $('.agg_geography').click(function(){
+        	// alert("To aggregate data by geography, please use the Data Extraction Tool (link at bottom of page).");
+           	alert("Aggregating using geography may take longer to generate the requested data.");
+
+        })
+
+
+		$('#aggregate').on('change', function () {
+			if ( $(this).val() == 'none' || $(this).val() == 'geography' ) {
+        		$('#subaggregate').prop('disabled', true);
+			    $('#subaggregate').val("none");
+			} else {
+				$('#subaggregate').prop('disabled', false);
+			}
+
+			if ( $(this).val() == 'geography' ) {
+        		$('#geoaggregate').prop('disabled', false);
+        		$('.precision_op').each( function () {
+        			$(this).prop('disabled', false);
+        		});
+
+			} else {
+				$('#geoaggregate').prop('disabled', true);
+        		$('.precision_op').each( function () {
+        			$(this).prop('disabled', true);
+        		});
+			}
+		})
+		
 
 		$('#filter').empty();
 		$('#values').empty();
@@ -175,6 +206,8 @@ $(document).ready(function(){
 
 
 	$('#submit').click(function(){
+		$('#message').html("Building Request...");
+		$('#download').empty();
 
 		if (p.country == "" || p.status == 0 || p.status == 1) {
 			$('#message').html("please select and load a country");
@@ -183,11 +216,19 @@ $(document).ready(function(){
 
 		p.aggregate =  ( $('#aggregate').val() == null ? "none" : $('#aggregate').val() );
 		p.subaggregate = ( $('#subaggregate').val() == null ? "none" : $('#subaggregate').val() );
+		p.geoaggregate = ( $('#geoaggregate').val() == null ? "adm1" : $('#geoaggregate').val() );
 
 		if (p.subaggregate != "none" && p.aggregate == p.subaggregate) {
 			$('#message').html("invalid subaggregate");
 			return;
 		}
+
+		p.precision_codes = []
+		$('#precision input:checkbox:checked').each(function(){
+			var value = $(this).val();
+			p.precision_codes.push(value);
+		})
+
 
 		p.filters = [];
 		p.options = [];
@@ -221,12 +262,16 @@ $(document).ready(function(){
 		// p.query += ")}";
 
 		if (p.options.length > 0 && p.aggregate != "none"){
+			// filters and aggregation
 			p.request = 3;
 		} else if (p.options.length > 0) {
+			// filters only
 			p.request = 2;
 		} else if (p.aggregate != "none") {
+			// aggregation only
 			p.request = 1;
 		} else {
+			// no filters or aggregation
 			p.request = 0;
 		}
 
@@ -238,7 +283,7 @@ $(document).ready(function(){
 		p.transaction_type = $("input[name=transaction_type]:checked").val();
 		p.filter_type = $("input[name=filter_type]:checked").val();
 
-		s = p;
+		s = JSON.parse( JSON.stringify( p ) );
 
 		console.log(s);
 
@@ -248,6 +293,8 @@ $(document).ready(function(){
 			type:s.type, 
 			aggregate:s.aggregate, 
 			subaggregate:s.subaggregate, 
+			geoaggregate:s.geoaggregate,
+			precision_codes:s.precision_codes,
 			// query:s.query, 
 			filters:s.filters, 
 			options:s.options, 
@@ -257,13 +304,14 @@ $(document).ready(function(){
 			end_year:s.end_year,
 			transaction_type:s.transaction_type
 		};
+
+		console.log(query_data)
+
 		
 		process(query_data, function (result){
 			console.log(result);
-			$('#download').empty();
 			if (result != "no data") {
-				$('#download').append('<a href="'+page_url+'/data/'+result+'.csv">Download CSV</a>');
-				$('#message').html("Request completed");
+				addLink(result);
 			} else {
 				$('#message').html("No data found");
 	        	$('html, body').animate({ scrollTop: 0 }, 0);
@@ -272,6 +320,23 @@ $(document).ready(function(){
 		})
 
 	})
+
+	function addLink(file) {
+		console.log("addLink file: "+file)
+		process({call:"exists",name:"DAT/data/"+file+".csv"}, function (result) {
+			console.log(result)
+			if (result == true) {
+				$('#download').append('<a href="'+page_url+'/data/'+file+'.csv">Download CSV</a>');
+				$('#message').html("Request completed");
+			} else {
+				setTimeout(function() {
+					addLink(file);
+				}, 2500);
+			}
+
+		})
+
+	}
 
 	// generic ajax call to process.php
 	function process(data, callback) {
